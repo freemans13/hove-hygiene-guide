@@ -49,7 +49,8 @@
  .pop-k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
  .pop-g{font-weight:600}.pop-meta{color:#5b6570;font-size:12px}
  .pop-a{color:#5b6570;font-size:12px;margin-top:5px}
- .pop-lk{display:inline-block;margin-top:7px;font-size:12px;color:#1a73e8;text-decoration:none}
+ .pop-travel{font-size:12px;font-weight:600;color:#0e7a3d;margin-top:6px}
+ .pop-lk{display:inline-block;margin-top:7px;font-size:12px;color:#1a73e8;text-decoration:none;margin-right:12px}
  .hy{display:inline-block;margin-top:5px;font-size:11px;font-weight:600;color:#0e7a3d;background:#e8f5ec;border-radius:4px;padding:1px 6px}
  .acc{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:middle;white-space:nowrap}
  .acc-star{background:#c1272d}.acc-bib{background:#c8971f}.acc-michelin{background:#64748b}.acc-bravo{background:#0e7a7a}
@@ -113,6 +114,12 @@
   .acc{font-size:9.5px;border-radius:6px;padding:1px 6px}
   .rt{color:var(--ios-tint);font-weight:600;font-size:15px;text-align:right;line-height:1.15}
   .rt span{color:var(--ios-l3)!important;font-weight:400}
+  .leaflet-popup-content{margin:9px 12px 10px!important;line-height:1.32}
+  .pop-nm{font-size:15px}
+  .pop-k{margin-bottom:3px}
+  .pop-a{margin-top:4px;font-size:11.5px}
+  .pop-travel{margin-top:4px}
+  .pop-lk{margin-top:7px}
  }
  @media (prefers-color-scheme: dark){
   :root{--ink:#f2f2f7;--muted:rgba(235,235,245,.6);
@@ -132,6 +139,7 @@
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#2c2c2e!important;color:#f2f2f7!important;box-shadow:0 2px 10px rgba(0,0,0,.5)!important}
   .leaflet-popup-content{color:#f2f2f7}
   .pop-nm{color:#fff}.pop-k,.pop-meta,.pop-a{color:rgba(235,235,245,.6)}
+  .pop-travel{color:#6ee7a0}
   .pop-lk{color:#0a84ff}
   .hy{color:#6ee7a0;background:rgba(52,199,89,.16)}
   .leaflet-bar a{background:#2c2c2e!important;color:#f2f2f7!important;border-bottom-color:#3a3a3c!important}
@@ -212,11 +220,15 @@ const HomeCtl=L.Control.extend({options:{position:'topleft'},onAdd:function(){
 map.addControl(new HomeCtl());
 const canvas=L.canvas({padding:0.5});
 function gmap(d){return d.pid?"https://www.google.com/maps/place/?q=place_id:"+d.pid:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(d.n+" "+d.c);}
+function haversine(a,b){const R=6371,dLat=(b[0]-a[0])*Math.PI/180,dLng=(b[1]-a[1])*Math.PI/180,l1=a[0]*Math.PI/180,l2=b[0]*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(l1)*Math.cos(l2)*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+function fmtKm(k){return k<1?Math.round(k*1000)+' m':k.toFixed(1)+' km';}
+function travelLine(d){const km=haversine(HOME,[d.lat,d.lng]);const w=Math.max(1,Math.round(km*1.25/5*60));return '<div class="pop-travel">From home &middot; ~'+fmtKm(km)+' &middot; ~'+w+' min walk</div>';}
+function dirLink(d){return 'https://www.google.com/maps/dir/?api=1&origin='+HOME[0]+','+HOME[1]+'&destination='+d.lat+','+d.lng+'&travelmode=walking';}
 function popup(d){
- const g=d.gr!=null?'<span class="pop-g" style="color:'+COL[d.b]+'">&#9733; '+d.gr.toFixed(1)+'</span> <span class="pop-meta">('+d.rv+' Google reviews)</span>':'<span class="pop-meta">Google rating pending</span>';
- const rk=d.rk?'<span class="pop-meta"> &middot; ranked #'+d.rk+'</span>':'';
+ const g=d.gr!=null?'<span class="pop-g" style="color:'+COL[d.b]+'">&#9733; '+d.gr.toFixed(1)+'</span> <span class="pop-meta">('+d.rv+' reviews)</span>':'<span class="pop-meta">Google rating pending</span>';
+ const rk=d.rk?'<span class="pop-meta"> &middot; #'+d.rk+'</span>':'';
  const acc=d.acl?'<div><span class="pop-acc pop-acc-'+d.ac+'">'+(d.ac=='star'?'&#9733; ':'')+d.acl+'</span></div>':'';
- return '<div class="pop-nm">'+d.n+'</div><div class="pop-k">'+(d.k=='pub'?'Pub / bar':'Restaurant / caf&eacute;')+' &middot; '+d.c+'</div>'+g+rk+acc+'<div><span class="hy">FHRS hygiene 5/5</span></div><div class="pop-a">'+(d.a?d.a+', ':'')+d.pc+'</div><a class="pop-lk" target="_blank" href="'+gmap(d)+'">View on Google Maps &rsaquo;</a>';
+ return '<div class="pop-nm">'+d.n+'</div><div class="pop-k">'+(d.k=='pub'?'Pub / bar':'Restaurant / caf&eacute;')+' &middot; '+d.c+'</div>'+g+rk+acc+travelLine(d)+'<div class="pop-a">'+(d.a?d.a+', ':'')+d.pc+'</div><a class="pop-lk" target="_blank" href="'+dirLink(d)+'">Directions from home &rsaquo;</a> <a class="pop-lk" target="_blank" href="'+gmap(d)+'">Google Maps &rsaquo;</a>';
 }
 function sizeFor(d){return d.gr==null?3.5:4+Math.max(0,d.gr-3.6)*6.2;}
 const markers={};
@@ -229,11 +241,16 @@ DATA.forEach(d=>{
  }else if(d.k=='pub'){const px=Math.round(s*1.7);
   m=L.marker([d.lat,d.lng],{icon:L.divIcon({className:'',iconSize:[px,px],html:'<div style="width:'+px+'px;height:'+px+'px;background:'+fill+';border:'+wt+'px solid '+stroke+';box-shadow:0 0 0 1px rgba(0,0,0,.25);transform:rotate(45deg)"></div>'})});
  }else{m=L.circleMarker([d.lat,d.lng],{renderer:canvas,radius:s,color:stroke,weight:wt,fillColor:fill,fillOpacity:d.gr==null?.95:.92});}
- m.bindPopup(popup(d));m._d=d;markers[d.n+'|'+d.pc]=m;
+ m.bindPopup(popup(d),{maxWidth:230,minWidth:180});m._d=d;markers[d.n+'|'+d.pc]=m;
 });
 let bandOn={top:true,high:true,mid:true,low:true,pend:true},awardOnly=false;
+let selectedKey=null;
+const ZMIN={top:13,high:14,mid:15,pend:16};
+function zoomOK(d){if(d.ac)return true;return map.getZoom()>=ZMIN[d.b];}
 function vis(d){return bandOn[d.b]&&(!awardOnly||!!d.ac);}
-function applyMap(){for(const k in markers){const m=markers[k],v=vis(m._d);if(v&&!map.hasLayer(m))m.addTo(map);else if(!v&&map.hasLayer(m))map.removeLayer(m);}}
+function visMap(d){return vis(d)&&(zoomOK(d)||(d.n+'|'+d.pc)===selectedKey);}
+function applyMap(){for(const k in markers){const m=markers[k],v=visMap(m._d);if(v&&!map.hasLayer(m))m.addTo(map);else if(!v&&map.hasLayer(m))map.removeLayer(m);}}
+map.on('zoomend',applyMap);
 const list=document.getElementById('list'),q=document.getElementById('q'),countEl=document.getElementById('count'),CAP=250;
 const TIER={star:0,bib:1,michelin:2,bravo:3};
 function render(){
@@ -253,7 +270,7 @@ function render(){
   const tags=(d.k=='pub'?'<span class="tag pub">PUB</span>':'')+'<span class="tag city">'+d.c+'</span>'+(d.ac?'<span class="acc acc-'+d.ac+'" title="'+d.acl+'">'+(d.ac=='star'?'&#9733; MICHELIN STAR':d.ac=='bib'?'BIB GOURMAND':d.ac=='michelin'?'MICHELIN GUIDE':'BRAVO')+'</span>':'');
   const rt=d.gr!=null?'&#9733;'+d.gr.toFixed(1)+'<br><span style="font-size:11px">'+d.rv+' rev</span>':'<span style="font-size:11px;color:#aeb6c2">pending</span>';
   row.innerHTML=lead+'<div class="cell"><div class="nm">'+d.n+tags+'</div><div class="sub">'+(d.a?d.a+', ':'')+d.pc+'</div></div><div class="rt">'+rt+'</div>';
-  row.onclick=()=>{map.setView([d.lat,d.lng],17,{animate:true});const m=markers[d.n+'|'+d.pc];if(m){if(!map.hasLayer(m))m.addTo(map);m.openPopup();}};
+  row.onclick=()=>{selectedKey=d.n+'|'+d.pc;const m=markers[selectedKey];applyMap();if(m){if(!map.hasLayer(m))m.addTo(map);m.openPopup();}map.fitBounds([HOME,[d.lat,d.lng]],{paddingTopLeft:[45,45],paddingBottomRight:[45,55],maxZoom:15});};
   list.appendChild(row);}
  countEl.textContent='Showing '+shown+(total>shown?' of '+total+' matches (refine search)':' of '+total)+' \u00b7 812 total';
 }
