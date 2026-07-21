@@ -4,10 +4,12 @@
 <title>Brighton &amp; Hove &middot; 5-Star Hygiene Restaurants, Caf&eacute;s &amp; Pubs</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
 <style>
- :root{--top:#0e7a3d;--high:#54a24b;--mid:#dd9a2e;--low:#d16a3a;--pend:#aeb6c2;--ink:#1c2024;--muted:#5b6570}
+ :root{--top:#0e7a3d;--high:#54a24b;--mid:#dd9a2e;--low:#d16a3a;--pend:#aeb6c2;--ink:#1c2024;--muted:#5b6570;
+  --ios-bg:#f2f2f7;--ios-card:#fff;--ios-l2:rgba(60,60,67,.6);--ios-l3:rgba(60,60,67,.3);--ios-sep:rgba(60,60,67,.28);--ios-fill:rgba(118,118,128,.12);--ios-tint:#34c759;--ios-blue:#007aff;--gold:#c8971f}
+ .ios-nav{display:none}
  *{box-sizing:border-box}html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
  #wrap{display:flex;flex-direction:column;height:100vh}
- header{padding:12px 18px;border-bottom:1px solid #e6e8eb;background:#fff;z-index:1000}
+ header{padding:12px 18px;border-bottom:1px solid #e6e8eb;background:#fff;z-index:1000;position:relative}
  header h1{margin:0;font-size:16.5px;font-weight:650;letter-spacing:-.01em}
  header p{margin:3px 0 0;font-size:12px;color:var(--muted)}
  header p a.rep{color:#0e7a3d;font-weight:600;text-decoration:none;white-space:nowrap}
@@ -18,6 +20,10 @@
  .dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
  .sq{width:10px;height:10px;display:inline-block;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);background:var(--pend);transform:rotate(45deg)}
  .hollow{width:11px;height:11px;border-radius:50%;display:inline-block;background:#fff;border:2px solid var(--pend)}
+ .star{display:inline-block;font-size:13px;line-height:1}
+ .report-btn{position:absolute;top:12px;right:18px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#e8f5ec;color:#0e7a3d;text-decoration:none;-webkit-tap-highlight-color:transparent}
+ .report-btn:hover{background:#d8eede}
+ .star::before{content:"\2605";color:#f5b301;text-shadow:0 0 1px rgba(122,86,0,.7)}
  .filters{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;border-left:1px solid #e6e8eb;padding-left:16px}
  .filters b{font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;align-self:center}
  .filters label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
@@ -45,22 +51,126 @@
  .pop-a{color:#5b6570;font-size:12px;margin-top:5px}
  .pop-lk{display:inline-block;margin-top:7px;font-size:12px;color:#1a73e8;text-decoration:none}
  .hy{display:inline-block;margin-top:5px;font-size:11px;font-weight:600;color:#0e7a3d;background:#e8f5ec;border-radius:4px;padding:1px 6px}
- .acc{display:inline-block;font-size:10px;font-weight:700;color:#7a5600;background:#fbefc6;border:1px solid #e6c760;border-radius:4px;padding:0 5px;margin-left:5px;vertical-align:middle;white-space:nowrap}
- .pop-acc{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:700;color:#7a5600;background:#fbefc6;border:1px solid #e6c760;border-radius:5px;padding:2px 7px}
+ .acc{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:middle;white-space:nowrap}
+ .acc-star{background:#c1272d}.acc-bib{background:#c8971f}.acc-guide{background:#64748b}.acc-bravo{background:#0e7a7a}
+ .pop-acc{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:700;color:#fff;border-radius:5px;padding:2px 8px}
+ .pop-acc-star{background:#c1272d}.pop-acc-bib{background:#c8971f}.pop-acc-guide{background:#64748b}.pop-acc-bravo{background:#0e7a7a}
  @media(max-width:760px){
   html,body{height:auto}
+  body{background:var(--ios-bg);-webkit-text-size-adjust:100%}
   #wrap{height:auto;min-height:100vh}
   #main{flex-direction:column}
-  #map{height:60vh;min-height:0;flex:none}
-  #side{width:100%;border-left:none;border-top:1px solid #e6e8eb;flex:none;min-height:0}
-  #list{overflow:visible;flex:none}
-  .sbar{position:sticky;top:0;z-index:5}
+
+  /* translucent large-title nav bar */
+  header{padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(249,249,251,.82);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--ios-sep)}
+  header h1,header p{display:none}
+  .ios-nav{display:block}
+  .ios-nav-title{font-size:28px;font-weight:700;letter-spacing:-.6px;color:#000;line-height:1.1}
+  .ios-nav-sub{font-size:13px;color:var(--ios-l2);margin-top:3px;letter-spacing:-.1px}
+
+  /* filter chips: one horizontally-scrollable row */
+  .controls{margin-top:12px}
+  .filters{border-left:none;padding-left:0;gap:8px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .filters::-webkit-scrollbar{display:none}
+  .filters b, .filters .legend{display:none}
+  .filters label{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:7px 13px;border-radius:100px;background:var(--ios-fill);font-size:14px;font-weight:500;color:#000;-webkit-tap-highlight-color:transparent;transition:background .15s}
+  .filters label input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+  .filters label .dot,.filters label .hollow{width:9px;height:9px}
+  .filters label:has(input:checked){background:var(--ios-tint);color:#fff}
+  .filters label:has(#fAward:checked){background:var(--gold);color:#fff}
+  .filters label .dot,.filters label .hollow{display:none}
+  .filters label:has(.fBand[value="top"]:checked){background:var(--top);color:#fff}
+  .filters label:has(.fBand[value="high"]:checked){background:var(--high);color:#fff}
+  .filters label:has(.fBand[value="mid"]:checked){background:var(--mid);color:#fff}
+  .filters label:has(.fBand[value="pend"]:checked){background:#8e8e93;color:#fff}
+
+  /* map as a rounded card */
+  #map{height:44vh;min-height:0;flex:none;margin:14px 16px 0;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.10)}
+  .leaflet-bar{border:none!important;border-radius:11px!important;box-shadow:0 1px 4px rgba(0,0,0,.18)!important;overflow:hidden}
+  .leaflet-bar a{width:34px!important;height:34px!important;line-height:34px!important;font-size:19px!important}
+  .leaflet-control-layers{border:none!important;border-radius:11px!important;box-shadow:0 1px 4px rgba(0,0,0,.18)!important}
+
+  /* list area on grouped background */
+  #side{width:100%;border:none;background:transparent;flex:none;min-height:0}
+  .sbar{position:static;background:transparent;border:none;padding:16px 16px 6px}
+  .sbar h2{font-size:12.5px;font-weight:400;letter-spacing:.02em;text-transform:uppercase;color:var(--ios-l2);margin:0 4px 9px}
+  #q{background:var(--ios-fill) url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%20fill='none'%20stroke='%238e8e93'%20stroke-width='1.7'%3E%3Ccircle%20cx='7'%20cy='7'%20r='5'/%3E%3Cline%20x1='10.8'%20y1='10.8'%20x2='15'%20y2='15'/%3E%3C/svg%3E") no-repeat 11px center;background-size:15px;border:none;border-radius:10px;padding:9px 12px 9px 34px;font-size:16px;color:#000}
+  #q:focus{box-shadow:none;background-color:var(--ios-fill)}
+  #q::placeholder{color:var(--ios-l2)}
+  #count{font-size:13px;color:var(--ios-l2);margin:9px 4px 0}
+
+  #list{overflow:visible;flex:none;margin:0 16px calc(env(safe-area-inset-bottom) + 26px);background:var(--ios-card);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .report-btn{top:calc(env(safe-area-inset-top) + 12px);right:16px;width:38px;height:38px;background:rgba(0,122,255,.12);color:var(--ios-blue)}
+  .report-btn:hover{background:rgba(0,122,255,.12)}
+  .row{padding:11px 34px 11px 14px;gap:12px;align-items:center;border-bottom:none;position:relative;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='13'%20viewBox='0%200%208%2013'%20fill='none'%20stroke='%23c4c4c6'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M1.5%201.5%206.5%206.5%201.5%2011.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:7px 12px}
+  .row:active{background-color:rgba(0,0,0,.05)}
+  .row:not(:last-child)::after{content:"";position:absolute;left:52px;right:0;bottom:0;height:.5px;background:var(--ios-sep)}
+  .rk{min-width:24px;font-size:15px;font-weight:600;color:var(--ios-l3);text-align:center}
+  .rk.nr{color:var(--ios-l3)}
+  .nm{font-size:16px;font-weight:590;letter-spacing:-.25px;color:#000;line-height:1.28}
+  .sub{font-size:13px;color:var(--ios-l2);margin-top:2px}
+  .tag{font-size:9.5px;padding:1px 5px;border-radius:5px}
+  .acc{font-size:9.5px;border-radius:6px;padding:1px 6px}
+  .rt{color:var(--ios-tint);font-weight:600;font-size:15px;text-align:right;line-height:1.15}
+  .rt span{color:var(--ios-l3)!important;font-weight:400}
+ }
+ @media (prefers-color-scheme: dark){
+  :root{--ink:#f2f2f7;--muted:rgba(235,235,245,.6);
+    --ios-bg:#000;--ios-card:#1c1c1e;--ios-l2:rgba(235,235,245,.6);--ios-l3:rgba(235,235,245,.32);
+    --ios-sep:rgba(84,84,88,.6);--ios-fill:rgba(118,118,128,.24);--ios-blue:#0a84ff}
+  body{background:#000;color:var(--ink)}
+  header h1{color:#f2f2f7}
+  header p{color:var(--muted)}
+  #side{background:#1c1c1e}
+  .sbar h2,#count{color:var(--muted)}
+  .nm{color:#f2f2f7}.sub{color:var(--muted)}
+  .rk{color:#30d158}.rk.nr{color:var(--ios-l3)}
+  .tag.city{background:#26343f;color:#a9cbe6}
+  .tag.pub{background:#3a3220;color:#e6cd92}
+  .filters b{color:var(--muted)}
+  .acc-guide,.pop-acc-guide{background:#7c8896}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#2c2c2e!important;color:#f2f2f7!important;box-shadow:0 2px 10px rgba(0,0,0,.5)!important}
+  .leaflet-popup-content{color:#f2f2f7}
+  .pop-nm{color:#fff}.pop-k,.pop-meta,.pop-a{color:rgba(235,235,245,.6)}
+  .pop-lk{color:#0a84ff}
+  .hy{color:#6ee7a0;background:rgba(52,199,89,.16)}
+  .leaflet-bar a{background:#2c2c2e!important;color:#f2f2f7!important;border-bottom-color:#3a3a3c!important}
+  .leaflet-control-layers{background:#2c2c2e!important;color:#f2f2f7!important;border:none!important}
+  .leaflet-control-layers-toggle{filter:invert(1) hue-rotate(180deg)}
+  .leaflet-control-attribution{background:rgba(28,28,30,.8)!important}
+  .leaflet-control-attribution,.leaflet-control-attribution a{color:#8e8e93!important}
+ }
+ @media (prefers-color-scheme: dark) and (min-width:761px){
+  header{background:#1c1c1e;border-bottom-color:rgba(84,84,88,.6)}
+  #side{border-left-color:rgba(84,84,88,.6)}
+  .sbar{background:#1c1c1e;border-bottom-color:rgba(84,84,88,.4)}
+  #q{background:#2c2c2e;border-color:#3a3a3c;color:#f2f2f7}
+  #q::placeholder{color:var(--muted)}
+  #q:focus{border-color:#30d158;box-shadow:0 0 0 2px rgba(48,209,88,.2)}
+  .row{border-bottom-color:rgba(84,84,88,.4)}
+  .row:hover{background:#2c2c2e}
+  .rt{color:var(--muted)}
+  .filters label{color:var(--ink)}
+  .legend{color:var(--muted)}
+  .report-btn{background:rgba(48,209,88,.18);color:#30d158}
+  .report-btn:hover{background:rgba(48,209,88,.28)}
+ }
+ @media (prefers-color-scheme: dark) and (max-width:760px){
+  header{background:rgba(28,28,30,.82);border-bottom-color:var(--ios-sep)}
+  .ios-nav-title{color:#fff}.ios-nav-sub{color:var(--ios-l2)}
+  #q{color:#f2f2f7}#q::placeholder{color:var(--ios-l2)}
+  .nm{color:#fff}
+  .row:active{background:rgba(255,255,255,.06)}
+  .filters label{color:#f2f2f7}
+  .report-btn{background:rgba(10,132,255,.22);color:var(--ios-blue)}
  }
 </style>
 </head><body>
 <div id="wrap"><header>
+ <a class="report-btn" href="https://www.gov.uk/government/publications/report-a-food-problem" target="_blank" rel="noopener" title="Report a food problem to the FSA" aria-label="Report a food problem to the FSA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 3.5L16 11H5"/></svg></a>
+ <div class="ios-nav"><div class="ios-nav-title">Brighton &amp; Hove</div><div class="ios-nav-sub">5&#9733; food-hygiene guide &middot; 812 places</div></div>
  <h1>Brighton &amp; Hove &middot; 5-star food-hygiene restaurants, caf&eacute;s &amp; pubs</h1>
- <p>812 establishments rated 5/5 for hygiene by the FSA. 173 in Hove plus 385 rated Brighton venues ranked by Google score; 254 Brighton venues plotted, ratings still being added. Data 20 Jul 2026. &nbsp;&middot;&nbsp; <a class="rep" href="https://www.gov.uk/government/publications/report-a-food-problem" target="_blank" rel="noopener">Report a food problem &rsaquo;</a></p>
+ <p>812 establishments rated 5/5 for hygiene by the FSA. 173 in Hove plus 385 rated Brighton venues ranked by Google score; 254 Brighton venues plotted, ratings still being added. Data 20 Jul 2026.</p>
  <div class="controls">
   <div class="filters"><b>Rating</b>
    <label><input type="checkbox" class="fBand" value="top" checked><i class="dot" style="background:var(--top)"></i>4.8&ndash;5.0</label>
@@ -68,15 +178,9 @@
    <label><input type="checkbox" class="fBand" value="mid" checked><i class="dot" style="background:var(--mid)"></i>4.1&ndash;4.4</label>
    <label><input type="checkbox" class="fBand" value="pend" checked><i class="hollow"></i>pending</label>
   </div>
-  <div class="filters"><b>City</b>
-   <label><input type="checkbox" class="fCity" value="Brighton" checked> Brighton</label>
-   <label><input type="checkbox" class="fCity" value="Hove" checked> Hove</label>
-   <b style="margin-left:6px">Type</b>
-   <label><input type="checkbox" class="fType" value="eatery" checked> Restaurants &amp; caf&eacute;s</label>
-   <label><input type="checkbox" class="fType" value="pub" checked> Pubs &amp; bars</label>
-   <b style="margin-left:6px">Acclaim</b>
+  <div class="filters"><b>Acclaim</b>
    <label title="Michelin, AA Rosette or BRAVO award holders only"><input type="checkbox" id="fAward"> &#9733; Award-winning only</label>
-   <span class="legend" style="margin-left:4px"><span><i class="dot"></i>caf&eacute; &nbsp;<i class="sq"></i>pub</span></span>
+   <span class="legend" style="margin-left:4px"><span><i class="star"></i>award</span> <span><i class="dot"></i>caf&eacute;</span> <span><i class="sq"></i>pub</span></span>
   </div>
  </div></header>
  <div id="main"><div id="map"></div>
@@ -91,9 +195,11 @@ const COL={top:"#0e7a3d",high:"#54a24b",mid:"#dd9a2e",low:"#d16a3a",pend:"#aeb6c
 const HOME=[50.8315,-0.1784];
 const map=L.map('map',{scrollWheelZoom:true,preferCanvas:true}).setView(HOME,16);
 const cleanTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'});
+const darkTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'});
 const detailTiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'});
-cleanTiles.addTo(map);
-L.control.layers({'Clean map':cleanTiles,'Detailed map':detailTiles},null,{position:'topright'}).addTo(map);
+const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+(prefersDark?darkTiles:cleanTiles).addTo(map);
+L.control.layers({'Clean map':cleanTiles,'Dark map':darkTiles,'Detailed map':detailTiles},null,{position:'topright'}).addTo(map);
 const homeMarker=L.marker(HOME,{icon:L.divIcon({className:'',iconSize:[32,32],iconAnchor:[16,30],popupAnchor:[0,-28],html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:#111827;border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.45);transform:rotate(-45deg);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);color:#fff;font-size:15px;line-height:1">&#8962;</span></div>'})}).addTo(map);
 homeMarker.bindPopup('<div class="pop-nm">Home</div>');
 const HomeCtl=L.Control.extend({options:{position:'topleft'},onAdd:function(){
@@ -110,22 +216,24 @@ function gmap(d){return d.pid?"https://www.google.com/maps/place/?q=place_id:"+d
 function popup(d){
  const g=d.gr!=null?'<span class="pop-g" style="color:'+COL[d.b]+'">&#9733; '+d.gr.toFixed(1)+'</span> <span class="pop-meta">('+d.rv+' Google reviews)</span>':'<span class="pop-meta">Google rating pending</span>';
  const rk=d.rk?'<span class="pop-meta"> &middot; ranked #'+d.rk+'</span>':'';
- const acc=d.acl?'<div><span class="pop-acc">&#9733; '+d.acl+'</span></div>':'';
+ const acc=d.acl?'<div><span class="pop-acc pop-acc-'+d.ac+'">'+(d.ac=='star'?'&#9733; ':'')+d.acl+'</span></div>':'';
  return '<div class="pop-nm">'+d.n+'</div><div class="pop-k">'+(d.k=='pub'?'Pub / bar':'Restaurant / caf&eacute;')+' &middot; '+d.c+'</div>'+g+rk+acc+'<div><span class="hy">FHRS hygiene 5/5</span></div><div class="pop-a">'+(d.a?d.a+', ':'')+d.pc+'</div><a class="pop-lk" target="_blank" href="'+gmap(d)+'">View on Google Maps &rsaquo;</a>';
 }
 function sizeFor(d){return d.gr==null?3.5:4+Math.max(0,d.gr-3.6)*6.2;}
 const markers={};
 DATA.forEach(d=>{
  const s=sizeFor(d),fill=d.gr==null?'#fff':COL[d.b];
- const acc=!!d.ac, stroke=acc?'#c8971f':(d.gr==null?COL.pend:'#fff'), wt=acc?2.6:(d.gr==null?2:1.5);
+ const stroke=d.gr==null?COL.pend:'#fff', wt=d.gr==null?2:1.5;
  let m;
- if(d.k=='pub'){const px=Math.round(s*1.7);
+ if(d.ac){const px=30;
+  m=L.marker([d.lat,d.lng],{zIndexOffset:1000,icon:L.divIcon({className:'',iconSize:[px,px],iconAnchor:[px/2,px/2],popupAnchor:[0,-px/2],html:'<svg width="'+px+'" height="'+px+'" viewBox="0 0 24 24" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))"><path d="M12 1.6l3.1 6.28 6.93 1.01-5.02 4.89 1.19 6.9L12 18.32 5.8 21.58l1.19-6.9L1.97 9.79l6.93-1.01z" fill="#f5b301" stroke="#5c3d00" stroke-width="1.1" stroke-linejoin="round"/></svg>'})});
+ }else if(d.k=='pub'){const px=Math.round(s*1.7);
   m=L.marker([d.lat,d.lng],{icon:L.divIcon({className:'',iconSize:[px,px],html:'<div style="width:'+px+'px;height:'+px+'px;background:'+fill+';border:'+wt+'px solid '+stroke+';box-shadow:0 0 0 1px rgba(0,0,0,.25);transform:rotate(45deg)"></div>'})});
  }else{m=L.circleMarker([d.lat,d.lng],{renderer:canvas,radius:s,color:stroke,weight:wt,fillColor:fill,fillOpacity:d.gr==null?.95:.92});}
  m.bindPopup(popup(d));m._d=d;markers[d.n+'|'+d.pc]=m;
 });
-let cityOn={Brighton:true,Hove:true},typeOn={eatery:true,pub:true},bandOn={top:true,high:true,mid:true,low:true,pend:true},awardOnly=false;
-function vis(d){return cityOn[d.c]&&typeOn[d.k]&&bandOn[d.b]&&(!awardOnly||!!d.ac);}
+let bandOn={top:true,high:true,mid:true,low:true,pend:true},awardOnly=false;
+function vis(d){return bandOn[d.b]&&(!awardOnly||!!d.ac);}
 function applyMap(){for(const k in markers){const m=markers[k],v=vis(m._d);if(v&&!map.hasLayer(m))m.addTo(map);else if(!v&&map.hasLayer(m))map.removeLayer(m);}}
 const list=document.getElementById('list'),q=document.getElementById('q'),countEl=document.getElementById('count'),CAP=250;
 const TIER={star:0,bib:1,michelin:2,bravo:3};
@@ -143,7 +251,7 @@ function render(){
  for(const d of matches){if(shown>=CAP)break;shown++;
   const row=document.createElement('div');row.className='row';
   const lead=d.ac?'<div class="rk" style="color:#c8971f">&#9733;</div>':(d.rk?'<div class="rk">'+d.rk+'</div>':'<div class="rk nr">&ndash;</div>');
-  const tags=(d.k=='pub'?'<span class="tag pub">PUB</span>':'')+'<span class="tag city">'+d.c+'</span>'+(d.ac?'<span class="acc" title="'+d.acl+'">&#9733; '+(d.ac=='star'?'MICHELIN \u2605':d.ac=='bib'?'BIB GOURMAND':d.ac=='michelin'?'MICHELIN':'BRAVO')+'</span>':'');
+  const tags=(d.k=='pub'?'<span class="tag pub">PUB</span>':'')+'<span class="tag city">'+d.c+'</span>'+(d.ac?'<span class="acc acc-'+d.ac+'" title="'+d.acl+'">'+(d.ac=='star'?'&#9733; MICHELIN STAR':d.ac=='bib'?'BIB GOURMAND':d.ac=='michelin'?'MICHELIN GUIDE':'BRAVO')+'</span>':'');
   const rt=d.gr!=null?'&#9733;'+d.gr.toFixed(1)+'<br><span style="font-size:11px">'+d.rv+' rev</span>':'<span style="font-size:11px;color:#aeb6c2">pending</span>';
   row.innerHTML=lead+'<div class="cell"><div class="nm">'+d.n+tags+'</div><div class="sub">'+(d.a?d.a+', ':'')+d.pc+'</div></div><div class="rt">'+rt+'</div>';
   row.onclick=()=>{map.setView([d.lat,d.lng],17,{animate:true});const m=markers[d.n+'|'+d.pc];if(m){if(!map.hasLayer(m))m.addTo(map);m.openPopup();}};
@@ -152,7 +260,5 @@ function render(){
 }
 document.getElementById('fAward').onchange=(e)=>{awardOnly=e.target.checked;applyMap();render();};
 document.querySelectorAll('.fBand').forEach(c=>c.onchange=()=>{bandOn[c.value]=c.checked;applyMap();render();});
-document.querySelectorAll('.fCity').forEach(c=>c.onchange=()=>{cityOn[c.value]=c.checked;applyMap();render();});
-document.querySelectorAll('.fType').forEach(c=>c.onchange=()=>{typeOn[c.value]=c.checked;applyMap();render();});
 q.oninput=render;applyMap();render();
 </script></body></html>
