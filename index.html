@@ -52,9 +52,9 @@
  .pop-lk{display:inline-block;margin-top:7px;font-size:12px;color:#1a73e8;text-decoration:none}
  .hy{display:inline-block;margin-top:5px;font-size:11px;font-weight:600;color:#0e7a3d;background:#e8f5ec;border-radius:4px;padding:1px 6px}
  .acc{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#fff;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:middle;white-space:nowrap}
- .acc-star{background:#c1272d}.acc-bib{background:#c8971f}.acc-guide{background:#64748b}.acc-bravo{background:#0e7a7a}
+ .acc-star{background:#c1272d}.acc-bib{background:#c8971f}.acc-michelin{background:#64748b}.acc-bravo{background:#0e7a7a}
  .pop-acc{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:700;color:#fff;border-radius:5px;padding:2px 8px}
- .pop-acc-star{background:#c1272d}.pop-acc-bib{background:#c8971f}.pop-acc-guide{background:#64748b}.pop-acc-bravo{background:#0e7a7a}
+ .pop-acc-star{background:#c1272d}.pop-acc-bib{background:#c8971f}.pop-acc-michelin{background:#64748b}.pop-acc-bravo{background:#0e7a7a}
  @media(max-width:760px){
   html,body{height:auto}
   body{background:var(--ios-bg);-webkit-text-size-adjust:100%}
@@ -85,7 +85,7 @@
   .filters label:has(.fBand[value="pend"]:checked){background:#8e8e93;color:#fff}
 
   /* map as a rounded card */
-  #map{height:44vh;min-height:0;flex:none;margin:14px 16px 0;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.10)}
+  #map{position:sticky;top:0;z-index:500;height:40vh;min-height:0;flex:none;margin:12px 16px 10px;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.14)}
   .leaflet-bar{border:none!important;border-radius:11px!important;box-shadow:0 1px 4px rgba(0,0,0,.18)!important;overflow:hidden}
   .leaflet-bar a{width:34px!important;height:34px!important;line-height:34px!important;font-size:19px!important}
   .leaflet-control-layers{border:none!important;border-radius:11px!important;box-shadow:0 1px 4px rgba(0,0,0,.18)!important}
@@ -128,7 +128,7 @@
   .tag.city{background:#26343f;color:#a9cbe6}
   .tag.pub{background:#3a3220;color:#e6cd92}
   .filters b{color:var(--muted)}
-  .acc-guide,.pop-acc-guide{background:#7c8896}
+  .acc-michelin,.pop-acc-michelin{background:#7c8896}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#2c2c2e!important;color:#f2f2f7!important;box-shadow:0 2px 10px rgba(0,0,0,.5)!important}
   .leaflet-popup-content{color:#f2f2f7}
   .pop-nm{color:#fff}.pop-k,.pop-meta,.pop-a{color:rgba(235,235,245,.6)}
@@ -200,14 +200,13 @@ const detailTiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.pn
 const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
 (prefersDark?darkTiles:cleanTiles).addTo(map);
 L.control.layers({'Clean map':cleanTiles,'Dark map':darkTiles,'Detailed map':detailTiles},null,{position:'topright'}).addTo(map);
-const homeMarker=L.marker(HOME,{icon:L.divIcon({className:'',iconSize:[32,32],iconAnchor:[16,30],popupAnchor:[0,-28],html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:#111827;border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.45);transform:rotate(-45deg);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);color:#fff;font-size:15px;line-height:1">&#8962;</span></div>'})}).addTo(map);
-homeMarker.bindPopup('<div class="pop-nm">Home</div>');
+const homeMarker=L.marker(HOME,{interactive:false,keyboard:false,icon:L.divIcon({className:'',iconSize:[32,32],iconAnchor:[16,30],html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:#111827;border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.45);transform:rotate(-45deg);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);color:#fff;font-size:15px;line-height:1">&#8962;</span></div>'})}).addTo(map);
 const HomeCtl=L.Control.extend({options:{position:'topleft'},onAdd:function(){
   const b=L.DomUtil.create('a','leaflet-bar leaflet-control');
   b.href='#';b.title='Back to home';b.setAttribute('role','button');b.setAttribute('aria-label','Back to home');
   b.innerHTML='&#8962;';
   b.style.cssText='display:flex;align-items:center;justify-content:center;width:30px;height:30px;font-size:18px;font-weight:700;text-decoration:none;background:#fff;color:#111827';
-  L.DomEvent.on(b,'click',function(e){L.DomEvent.stop(e);map.setView(HOME,16);homeMarker.openPopup();});
+  L.DomEvent.on(b,'click',function(e){L.DomEvent.stop(e);map.setView(HOME,16);});
   return b;
 }});
 map.addControl(new HomeCtl());
