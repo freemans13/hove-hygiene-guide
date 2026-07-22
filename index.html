@@ -244,7 +244,7 @@ function haversine(a,b){const R=6371,dLat=(b[0]-a[0])*Math.PI/180,dLng=(b[1]-a[1
 function fmtKm(k){return k<1?Math.round(k*1000)+' m':k.toFixed(1)+' km';}
 function travelLine(d){const km=haversine(HOME,[d.lat,d.lng]);const w=Math.max(1,Math.round(km*1.25/5*60));return '<div class="pop-travel">From home &middot; ~'+w+' min walk</div>';}
 function dirLink(d){return 'https://maps.apple.com/?saddr='+HOME[0]+','+HOME[1]+'&daddr='+d.lat+','+d.lng+'&dirflg=w';}
-function amap(d){return 'https://maps.apple.com/?q='+encodeURIComponent(d.n)+'&ll='+d.lat+','+d.lng;}
+function amap(d){return 'https://maps.apple.com/?q='+encodeURIComponent(d.n+' '+d.c)+'&sll='+d.lat+','+d.lng;}
 function popup(d){
  const g=d.gr!=null?'<span class="pop-g" style="color:'+COL[d.b]+'">&#9733; '+d.gr.toFixed(1)+'</span> <span class="pop-meta">('+d.rv+' reviews)</span>':'<span class="pop-meta">Google rating pending</span>';
  const rk=d.rk?'<span class="pop-meta"> &middot; #'+d.rk+'</span>':'';
