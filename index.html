@@ -35,7 +35,7 @@
  #q:focus{border-color:#54a24b;box-shadow:0 0 0 2px rgba(84,162,75,.15)}
  #count{font-size:11px;color:var(--muted);margin-top:6px}
  #list{overflow-y:auto;flex:1}
- .row{display:flex;gap:9px;align-items:baseline;padding:8px 14px;border-bottom:1px solid #f1f2f4;cursor:pointer}
+ .row{display:flex;gap:9px;align-items:baseline;padding:8px 14px;border-bottom:1px solid #f1f2f4;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
  .row:hover{background:#f5f8f5}
  .rk{font-variant-numeric:tabular-nums;font-weight:700;color:#0e7a3d;min-width:26px;font-size:13px}
  .rk.nr{color:#c2c7cf;font-weight:600}
@@ -50,10 +50,6 @@
  .pop-g{font-weight:600}.pop-meta{color:#5b6570;font-size:12px}
  .pop-a{color:#5b6570;font-size:12px;margin-top:5px}
  .pop-travel{font-size:12px;font-weight:600;color:#0e7a3d;margin-top:6px}
- .rev-filter{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:12px;color:var(--muted)}
- .rev-filter label{white-space:nowrap}
- .rev-filter b{color:var(--ink);font-weight:700}
- .rev-filter input[type=range]{flex:1;min-width:0;height:4px;accent-color:#34c759;cursor:pointer}
  .sheet-grab{display:none}
  .pop-lk{display:inline-block;margin-top:7px;font-size:12px;color:#1a73e8;text-decoration:none;margin-right:12px}
  .hy{display:inline-block;margin-top:5px;font-size:11px;font-weight:600;color:#0e7a3d;background:#e8f5ec;border-radius:4px;padding:1px 6px}
@@ -199,12 +195,15 @@
      <label><input type="checkbox" class="fBand" value="high" checked><i class="dot" style="background:var(--high)"></i>4.5&ndash;4.7</label>
      <label><input type="checkbox" class="fBand" value="mid" checked><i class="dot" style="background:var(--mid)"></i>4.1&ndash;4.4</label>
      <label><input type="checkbox" class="fBand" value="pend" checked><i class="hollow"></i>pending</label>
+     <b style="margin-left:6px">Reviews</b>
+     <label><input type="checkbox" class="fRev" value="r0"> 0&ndash;500</label>
+     <label><input type="checkbox" class="fRev" value="r1" checked> 501&ndash;1000</label>
+     <label><input type="checkbox" class="fRev" value="r2" checked> 1001+</label>
      <b style="margin-left:6px">Type</b>
      <label><input type="checkbox" class="fType" value="eatery" checked> Restaurants &amp; caf&eacute;s</label>
      <label><input type="checkbox" class="fType" value="pub" checked> Pubs &amp; bars</label>
      <span class="legend" style="margin-left:4px"><span><i class="star"></i>award</span> <span><i class="dot"></i>caf&eacute;</span> <span><i class="sq"></i>pub</span></span>
     </div></div>
-    <div class="rev-filter"><label for="revMin">Min reviews <b id="revVal">500</b></label><input type="range" id="revMin" min="0" max="1000" step="25" value="500"></div>
     <div id="count"></div>
    </div>
    <div id="list"></div>
@@ -257,11 +256,11 @@ DATA.forEach(d=>{
  }else{m=L.circleMarker([d.lat,d.lng],{renderer:canvas,radius:s,color:stroke,weight:wt,fillColor:fill,fillOpacity:d.gr==null?.95:.92});}
  m.bindPopup(popup(d),{maxWidth:230,minWidth:180});m._d=d;markers[d.n+'|'+d.pc]=m;
 });
-let bandOn={top:true,high:true,mid:true,low:true,pend:true},minReviews=500,typeOn={eatery:true,pub:true};
+let bandOn={top:true,high:true,mid:true,low:true,pend:true},typeOn={eatery:true,pub:true},revBands={r0:false,r1:true,r2:true};
 let selectedKey=null;
 const ZMIN={top:13,high:14,mid:15,pend:16};
 function zoomOK(d){if(d.ac)return true;return map.getZoom()>=ZMIN[d.b];}
-function reviewOK(d){return d.ac||d.gr==null?true:d.rv>=minReviews;}
+function reviewOK(d){if(d.ac||d.gr==null)return true;var b=d.rv<=500?'r0':d.rv<=1000?'r1':'r2';return revBands[b];}
 function vis(d){return bandOn[d.b]&&typeOn[d.k]&&reviewOK(d);}
 function visMap(d){return vis(d)&&(zoomOK(d)||(d.n+'|'+d.pc)===selectedKey);}
 function applyMap(){for(const k in markers){const m=markers[k],v=visMap(m._d);if(v&&!map.hasLayer(m))m.addTo(map);else if(!v&&map.hasLayer(m))map.removeLayer(m);}}
@@ -290,8 +289,8 @@ function render(){
  countEl.textContent='Showing '+shown+(total>shown?' of '+total+' matches (refine search)':' of '+total)+' \u00b7 794 total';
  var sc=document.getElementById('sheetCount');if(sc)sc.textContent=total;
 }
-(function(){const rm=document.getElementById('revMin'),rv=document.getElementById('revVal');rm.oninput=()=>{minReviews=+rm.value;rv.textContent=rm.value==='0'?'any':rm.value;applyMap();render();};})();
 document.querySelectorAll('.fBand').forEach(c=>c.onchange=()=>{bandOn[c.value]=c.checked;applyMap();render();});
+document.querySelectorAll('.fRev').forEach(c=>c.onchange=()=>{revBands[c.value]=c.checked;applyMap();render();});
 document.querySelectorAll('.fType').forEach(c=>c.onchange=()=>{typeOn[c.value]=c.checked;applyMap();render();});
 q.oninput=render;applyMap();render();
 
