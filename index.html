@@ -279,7 +279,7 @@ DATA.forEach(d=>{
  }else{m=L.circleMarker([d.lat,d.lng],{renderer:canvas,radius:s,color:stroke,weight:wt,fillColor:fill,fillOpacity:d.gr==null?.95:.92});}
  m.bindTooltip(popup(d),{direction:tipDir(d),interactive:true,permanent:false,sticky:false,opacity:1,className:'venue-tip'});
  m.on('click',function(){openVenueTip(m);requestAnimationFrame(function(){ensureTipVisible(m);});});
- m.on('tooltipopen',function(){if(openTip&&openTip!==m)openTip.closeTooltip();openTip=m;});
+ m.on('tooltipopen',function(){if(openTip&&openTip!==m)openTip.closeTooltip();openTip=m;var el=m.getTooltip()&&m.getTooltip().getElement();if(el){L.DomEvent.disableClickPropagation(el);L.DomEvent.disableScrollPropagation(el);el.querySelectorAll('a.pop-lk').forEach(function(a){a.onclick=function(ev){ev.stopPropagation();window.open(a.href,'_blank','noopener');ev.preventDefault();};});}});
  m.on('tooltipclose',function(){if(openTip===m)openTip=null;});
  m._d=d;markers[d.n+'|'+d.pc]=m;
 });
