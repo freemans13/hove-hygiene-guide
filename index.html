@@ -330,10 +330,20 @@ function render(){
  countEl.textContent='Showing '+shown+(total>shown?' of '+total+' matches (refine search)':' of '+total)+' \u00b7 703 total';
  var sc=document.getElementById('sheetCount');if(sc)sc.textContent=total;
 }
-document.querySelectorAll('.fBand').forEach(c=>c.onchange=()=>{bandOn[c.value]=c.checked;applyMap();render();});
-document.querySelectorAll('.fRev').forEach(c=>c.onchange=()=>{revBands[c.value]=c.checked;applyMap();render();});
-document.querySelectorAll('.fType').forEach(c=>c.onchange=()=>{typeOn[c.value]=c.checked;applyMap();render();});
-document.getElementById('fVeg').onchange=(e)=>{vegOnly=e.target.checked;applyMap();render();};
+const LSK='bhg_filters_v1';
+function saveFilters(){try{localStorage.setItem(LSK,JSON.stringify({band:bandOn,type:typeOn,rev:revBands,veg:vegOnly}));}catch(e){}}
+function loadFilters(){try{var s=JSON.parse(localStorage.getItem(LSK)||'null');if(!s)return;
+  if(s.band)Object.assign(bandOn,s.band);if(s.type)Object.assign(typeOn,s.type);if(s.rev)Object.assign(revBands,s.rev);if(typeof s.veg==='boolean')vegOnly=s.veg;
+  document.querySelectorAll('.fBand').forEach(c=>c.checked=!!bandOn[c.value]);
+  document.querySelectorAll('.fType').forEach(c=>c.checked=!!typeOn[c.value]);
+  document.querySelectorAll('.fRev').forEach(c=>c.checked=!!revBands[c.value]);
+  var fv=document.getElementById('fVeg');if(fv)fv.checked=vegOnly;
+}catch(e){}}
+document.querySelectorAll('.fBand').forEach(c=>c.onchange=()=>{bandOn[c.value]=c.checked;saveFilters();applyMap();render();});
+document.querySelectorAll('.fRev').forEach(c=>c.onchange=()=>{revBands[c.value]=c.checked;saveFilters();applyMap();render();});
+document.querySelectorAll('.fType').forEach(c=>c.onchange=()=>{typeOn[c.value]=c.checked;saveFilters();applyMap();render();});
+document.getElementById('fVeg').onchange=(e)=>{vegOnly=e.target.checked;saveFilters();applyMap();render();};
+loadFilters();
 q.oninput=render;applyMap();render();
 
 /* ---- mobile bottom sheet: drag + snap detents (peek / half / full) ---- */
